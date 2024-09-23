@@ -94,18 +94,36 @@ int main() {
 
     //receive MESSAGES
     char recvbuff[BUFLEN];
-    int recvbuflen = BUFLEN;
 
     do {
-        res = recv(client, recvbuff, recvbuflen, 0);
+        res = recv(client, recvbuff, BUFLEN, 0);
         if (res > 0) {
 
-            printf("Message: %s\n", recvbuff);
-            if (!memcap(recvbuff, "/quit", 5* sizeof(char))) {
+            recvbuff[res] = '\0';
+
+            printf("Message(%d): %s\n",res, recvbuff);
+
+            if (!memcmp(recvbuff, "/quit", 5* sizeof(char))) {
                 printf("Client has disconnected\n");
                 break;
             }
             sendRes = send(client, recvbuff, res, 0);
+            if (sendRes != res) {
+                printf("send failed: %d\n", WSAGetLastError());
+                shutdown(client, SD_BOTH);
+                closesocket(client);
+                break;
+                
+            }
+        }
+        else if (res == 0) {
+            printf("Connection closed\n");
+        }
+        else {
+            printf("recv failed: %d\n", WSAGetLastError());
+            shutdown(client, SD_BOTH);
+            closesocket(client);
+            break;
         }
     } while (res > 0);
 
