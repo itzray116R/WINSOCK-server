@@ -16,8 +16,10 @@
 #define PORT 27015
 #define ADDRESS "127.0.0.1" // localhost
 
+typedef atomic_char;
+
 // global running variable
-_Atomic char running = 0; // default false
+atomic_char running = 0; // default false
 
 DWORD WINAPI sendThreadFunc(LPVOID lpParam);
 
